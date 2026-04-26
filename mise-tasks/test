@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#MISE description="Run backend plugin tests"
+set -euo pipefail
+
+mise plugin link --force clang .
+mise cache clear
+
+echo "Testing version listing..."
+if mise ls-remote clang:llvm 2>/dev/null; then
+    echo "Version listing works"
+else
+    echo "Version listing failed"
+    exit 1
+fi
+
+echo "Testing installation..."
+if mise install clang:llvm@latest 2>/dev/null; then
+    echo "Installation works"
+    
+    if mise exec clang:llvm@latest -- clang --version 2>/dev/null; then
+        echo "Tool execution works"
+    else
+        echo "Tool execution failed"
+        exit 1
+    fi
+else
+    echo "Installation failed"
+    exit 1
+fi
+
+echo "All tests completed successfully"
